@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APAC Sample Needs Survey</title>
+<meta name="description" content="A short survey on sample needs across APAC. About 2 minutes.">
+<meta name="theme-color" content="#0E2723">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7ECEA;
+    --surface:#FFFFFF;
+    --ink:#0E2723;
+    --ink-2:#4C635E;
+    --line:#CBD6D2;
+    --jade:#0F7A63;
+    --jade-deep:#0A5A48;
+    --jade-soft:#E4F1EC;
+    --brass:#C0891F;
+    --alert:#A8382A;
+    --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+    --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --r:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100svh;
+  }
+  .wrap{
+    max-width:600px;margin:0 auto;min-height:100svh;
+    display:flex;flex-direction:column;
+    background:var(--paper);
+  }
+
+  /* ---------- header / quota grid signature ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px 12px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .grid-track{display:flex;gap:5px;flex:1;flex-wrap:nowrap}
+  .cell{
+    flex:1;height:14px;max-width:22px;
+    border:1px solid var(--line);border-radius:3px;
+    background:var(--surface);
+    transition:background .3s ease,border-color .3s ease,transform .3s ease;
+  }
+  .cell.done{background:var(--jade);border-color:var(--jade)}
+  .cell.now{border:2px solid var(--brass);background:#FBF3E0;transform:translateY(-1px)}
+  .counter{
+    font-family:var(--mono);font-size:11px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink-2);white-space:nowrap;
+  }
+  .banner{
+    background:#FBF3E0;border-bottom:1px solid #E7D3A3;
+    font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+    color:#7A5A11;padding:8px 20px;text-align:center;
+  }
+
+  /* ---------- stage ---------- */
+  main{flex:1;padding:26px 20px 20px}
+  .screen{animation:rise .28s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--jade);margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(28px,7.4vw,38px);line-height:1.08;
+    letter-spacing:-.02em;margin:0 0 16px;
+  }
+  h2{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(21px,5.4vw,26px);line-height:1.22;
+    letter-spacing:-.015em;margin:0 0 8px;
+  }
+  .lede{color:var(--ink-2);margin:0 0 18px;font-size:15.5px}
+  .help{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-2);margin:0 0 16px;
+    display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  }
+  .help .left{flex:1}
+  .remaining{color:var(--brass);white-space:nowrap}
+  .remaining.full{color:var(--alert)}
+
+  /* ---------- options ---------- */
+  .opts{display:flex;flex-direction:column;gap:8px;margin:0 0 8px}
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:14px 15px;
+    font:inherit;color:var(--ink);text-align:left;cursor:pointer;
+    transition:border-color .15s ease,background .15s ease,transform .08s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .opt:active{transform:scale(.994)}
+  .opt:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+  .opt .mark{
+    flex:0 0 auto;width:20px;height:20px;margin-top:1px;
+    border:1.5px solid var(--line);background:#fff;
+    display:grid;place-items:center;transition:all .15s ease;
+  }
+  .opt[data-shape="square"] .mark{border-radius:5px}
+  .opt[data-shape="circle"] .mark{border-radius:50%}
+  .opt .mark svg{width:12px;height:12px;opacity:0;transform:scale(.6);transition:all .15s ease}
+  .opt[aria-pressed="true"]{border-color:var(--jade);background:var(--jade-soft)}
+  .opt[aria-pressed="true"] .mark{border-color:var(--jade);background:var(--jade)}
+  .opt[aria-pressed="true"] .mark svg{opacity:1;transform:none}
+  .opt[data-muted="true"]{opacity:.42}
+  .opt .label{flex:1;font-size:15.5px;line-height:1.35}
+
+  .otherbox{margin:4px 0 0;padding:0 0 0 32px}
+  input[type="text"],textarea{
+    width:100%;font:inherit;font-size:16px;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:12px 13px;
+  }
+  input[type="text"]:focus,textarea:focus{
+    outline:none;border-color:var(--jade);box-shadow:0 0 0 3px var(--jade-soft);
+  }
+  textarea{min-height:150px;resize:vertical;line-height:1.5}
+  .charcount{font-family:var(--mono);font-size:11px;color:var(--ink-2);text-align:right;margin-top:6px}
+
+  .err{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;
+    color:var(--alert);margin:12px 0 0;min-height:1em;
+  }
+
+  /* ---------- footer nav ---------- */
+  .nav{
+    position:sticky;bottom:0;z-index:20;
+    background:linear-gradient(to bottom,rgba(231,236,234,0),var(--paper) 22%);
+    padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+    display:flex;gap:10px;align-items:center;
+  }
+  button.btn{
+    font-family:var(--body);font-weight:600;font-size:16px;
+    border-radius:var(--r);padding:15px 22px;border:1px solid transparent;
+    cursor:pointer;transition:background .15s ease,transform .08s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  button.btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+  .btn.primary{background:var(--jade);color:#fff;flex:1}
+  .btn.primary:hover{background:var(--jade-deep)}
+  .btn.primary:active{transform:scale(.99)}
+  .btn.primary[disabled]{background:#9BB3AD;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--line);padding:15px 18px}
+  .btn.ghost:hover{background:#DDE4E1}
+
+  /* ---------- terminal screens ---------- */
+  .end{padding:40px 20px 60px;text-align:left}
+  .seal{
+    width:56px;height:56px;border-radius:14px;background:var(--jade);
+    display:grid;place-items:center;margin:0 0 22px;
+  }
+  .seal svg{width:28px;height:28px}
+  .end p{color:var(--ink-2);font-size:16px;max-width:46ch}
+  .meta{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-2);border-top:1px solid var(--line);margin-top:32px;padding-top:14px;
+  }
+  pre.dump{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:14px;font-family:var(--mono);font-size:11.5px;line-height:1.6;
+    white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;margin-top:18px;
+  }
+  .spinner{
+    width:18px;height:18px;border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff;border-radius:50%;display:inline-block;
+    vertical-align:-3px;margin-right:9px;animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+  }
+  @media (min-width:620px){
+    main{padding:38px 28px 24px}
+    .nav{padding:18px 28px 26px}
+    .topbar{padding:16px 28px 14px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="banner"></div>
+  <header class="topbar" id="topbar" hidden>
+    <div class="grid-track" id="track" aria-hidden="true"></div>
+    <div class="counter" id="counter"></div>
+  </header>
+
+  <main id="stage" aria-live="polite"></main>
+
+  <div class="nav" id="nav" hidden>
+    <button class="btn ghost" id="back" type="button">Back</button>
+    <button class="btn primary" id="next" type="button">Next</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — set your endpoint here, then re-upload the file.
+   Leave endpoint empty to run in preview mode (nothing is saved).
+   ============================================================ */
+const CONFIG = {
+  // Paste a Google Apps Script Web App URL (…script.google.com/macros/s/…/exec)
+  // or a Formspree endpoint (https://formspree.io/f/xxxxxxx). See setup guide.
+  endpoint: "",
+
+  // Q2 answers that let a respondent continue. Add "Global / Multi-region"
+  // here if you also want multi-region researchers to qualify.
+  qualifyingRegions: ["APAC"],
+
+  // Shown in the footer of the intro and thank-you screens.
+  organisation: ""
+};
+
+/* ============================================================
+   SURVEY CONTENT
+   ============================================================ */
+const APAC_MARKETS = ["Australia","China","India","Indonesia","Japan","Malaysia",
+  "Philippines","Singapore","South Korea","Taiwan","Thailand","Vietnam"];
+
+const QUESTIONS = [
+  { id:"q1", type:"single",
+    title:"Which best describes your organization?",
+    options:["Market research agency","Brand / End client","Consulting firm",
+             "Sample provider","Technology / Research platform","Other (please specify)"] },
+
+  { id:"q2", type:"multi", screener:true,
+    title:"Which regions do you currently conduct or plan to conduct research in?",
+    help:"Select all that apply.",
+    options:["APAC","North America","South America","Europe",
+             "Middle East & Africa (MEA)","Global / Multi-region","Other (please specify)"] },
+
+  { id:"q3", type:"multi", max:3,
+    title:"Which APAC markets are the most difficult for you to recruit?",
+    help:"Select up to 3.",
+    options:[...APAC_MARKETS,"None","Other (please specify)"],
+    exclusive:["None"] },
+
+  { id:"q4", type:"multi", max:3,
+    title:"What are your biggest challenges when sourcing sample in APAC?",
+    help:"Select up to 3.",
+    options:["Low incidence rates","Limited panel availability","High sample costs",
+             "Difficult quotas","Hard-to-reach audiences","Data quality","Slow fieldwork",
+             "Fraud / duplicate respondents","Lack of local market expertise",
+             "Other (please specify)"] },
+
+  { id:"q5", type:"multi", max:5,
+    title:"What are the most important factors when selecting an APAC sample provider?",
+    help:"Select up to 5.",
+    options:["Data quality","Competitive pricing","Fast turnaround","Strong feasibility",
+             "Large panel / sample availability","Niche audience access",
+             "Coverage across multiple APAC markets","Local market expertise",
+             "API / technology integration","Strong project management"] },
+
+  { id:"q6", type:"multi",
+    title:"Which APAC markets do you expect to have increased research demand over the next 12 months?",
+    help:"Select all that apply.",
+    options:[...APAC_MARKETS,"Not expecting an increase","Other (please specify)"],
+    exclusive:["Not expecting an increase"] },
+
+  { id:"q7", type:"single",
+    title:"Approximately how many APAC completes does your organization expect to source in the next 12 months?",
+    options:["Under 1,000","1,000–5,000","5,001–10,000","10,001–25,000","25,000+","Unsure"] },
+
+  { id:"q8", type:"multi", max:3,
+    title:"What would make you consider working with a new sample provider in APAC?",
+    help:"Select up to 3.",
+    options:["Better pricing","Access to difficult-to-reach audiences","Better feasibility",
+             "Faster fieldwork","Better data quality","Stronger coverage in specific APAC markets",
+             "API / automated sample access","More flexible quotas",
+             "Better project management / support","Other (please specify)"] },
+
+  { id:"q9", type:"text", optional:true,
+    title:"If you could improve one aspect of conducting research in APAC, what would it be?",
+    help:"Open response.",
+    placeholder:"Tell us in your own words…" }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  step: -1,                    // -1 = intro, 0..8 = questions, 'end' handled separately
+  answers: {},
+  startedAt: Date.now(),
+  sending: false
+};
+QUESTIONS.forEach(q => state.answers[q.id] = { values: [], other: "", text: "" });
+
+const $ = s => document.querySelector(s);
+const stage = $("#stage"), nav = $("#nav"), topbar = $("#topbar"),
+      track = $("#track"), counter = $("#counter"),
+      backBtn = $("#back"), nextBtn = $("#next");
+
+const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const isOther = v => v.startsWith("Other (please specify)");
+const answered = q => q.type === "text"
+  ? (q.optional || state.answers[q.id].text.trim().length > 0)
+  : state.answers[q.id].values.length > 0;
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderChrome(){
+  if(state.step < 0){ topbar.hidden = true; return; }
+  topbar.hidden = false;
+  track.innerHTML = QUESTIONS.map((q,i) =>
+    `<div class="cell ${i < state.step ? "done" : ""} ${i === state.step ? "now" : ""}"></div>`
+  ).join("");
+  counter.textContent = `Q${state.step + 1} / ${QUESTIONS.length}`;
+}
+
+function renderIntro(){
+  nav.hidden = false;
+  backBtn.hidden = true;
+  nextBtn.textContent = "Start the survey";
+  stage.innerHTML = `
+    <div class="screen">
+      <p class="eyebrow">APAC sample study · ${QUESTIONS.length} questions · ~2 minutes</p>
+      <h1>Where does sample fall short in APAC?</h1>
+      <p class="lede">We'd like to better understand the current and future sample needs of the market
+      research industry across APAC. Your feedback will help identify where sample providers can better
+      support researchers with recruitment, feasibility, quality, and fieldwork.</p>
+      <p class="lede">Responses are anonymous and reported in aggregate.</p>
+      ${CONFIG.organisation ? `<p class="meta">Run by ${CONFIG.organisation}</p>` : ""}
+    </div>`;
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[state.step];
+  const a = state.answers[q.id];
+  nav.hidden = false;
+  backBtn.hidden = false;
+  nextBtn.textContent = state.step === QUESTIONS.length - 1 ? "Submit answers" : "Next";
+
+  let helpRow = "";
+  if(q.help || q.max){
+    const left = q.max ? q.max - a.values.length : null;
+    helpRow = `<div class="help">
+      <span class="left">${q.help || ""}</span>
+      ${q.max ? `<span class="remaining ${left === 0 ? "full" : ""}" id="remaining">${
+        left === 0 ? "Limit reached" : `${left} left`}</span>` : ""}
+    </div>`;
+  }
+
+  let field;
+  if(q.type === "text"){
+    field = `<textarea id="freetext" placeholder="${q.placeholder || ""}"
+      maxlength="600">${a.text.replace(/</g,"&lt;")}</textarea>
+      <div class="charcount"><span id="cc">${a.text.length}</span> / 600</div>`;
+  } else {
+    const shape = q.type === "single" ? "circle" : "square";
+    const atMax = q.max && a.values.length >= q.max;
+    field = `<div class="opts" role="group">` + q.options.map((opt,i) => {
+      const on = a.values.includes(opt);
+      const muted = !on && (atMax || (q.exclusive && a.values.some(v => q.exclusive.includes(v))));
+      return `<button class="opt" type="button" data-shape="${shape}" data-opt="${i}"
+        aria-pressed="${on}" data-muted="${muted}">
+        <span class="mark">${TICK}</span><span class="label">${opt}</span>
+      </button>` + (isOther(opt) && on
+        ? `<div class="otherbox"><input type="text" id="otherinput" maxlength="120"
+             placeholder="Please specify" value="${a.other.replace(/"/g,"&quot;")}"></div>`
+        : "");
+    }).join("") + `</div>`;
+  }
+
+  stage.innerHTML = `
+    <div class="screen">
+      <p class="eyebrow">Question ${state.step + 1}</p>
+      <h2>${q.title}</h2>
+      ${helpRow}
+      ${field}
+      <p class="err" id="err"></p>
+    </div>`;
+
+  stage.querySelectorAll(".opt").forEach(btn => {
+    btn.addEventListener("click", () => toggle(q, q.options[+btn.dataset.opt]));
+  });
+  const oi = $("#otherinput");
+  if(oi){ oi.addEventListener("input", e => a.other = e.target.value); }
+  const ft = $("#freetext");
+  if(ft){ ft.addEventListener("input", e => { a.text = e.target.value; $("#cc").textContent = e.target.value.length; }); }
+}
+
+function toggle(q, opt){
+  const a = state.answers[q.id];
+  const on = a.values.includes(opt);
+
+  if(q.type === "single"){
+    a.values = on ? [] : [opt];
+    if(!a.values.some(isOther)) a.other = "";
+    renderQuestion();
+    if(!on && isOther(opt)){ const oi = $("#otherinput"); if(oi) oi.focus(); return; }
+    if(!on) setTimeout(() => goNext(true), 210);   // auto-advance
+    return;
+  }
+
+  if(on){
+    a.values = a.values.filter(v => v !== opt);
+    if(isOther(opt)) a.other = "";
+  } else {
+    if(q.exclusive && q.exclusive.includes(opt)){ a.values = [opt]; a.other = ""; }
+    else {
+      if(q.exclusive) a.values = a.values.filter(v => !q.exclusive.includes(v));
+      if(q.max && a.values.length >= q.max){
+        const r = $("#remaining");
+        if(r){ r.textContent = `Limit reached — deselect one first`; r.classList.add("full"); }
+        return;
+      }
+      a.values.push(opt);
+    }
+  }
+  renderQuestion();
+  if(isOther(opt) && !on){ const oi = $("#otherinput"); if(oi) oi.focus(); }
+}
+
+/* ============================================================
+   NAVIGATION + VALIDATION
+   ============================================================ */
+function goNext(auto){
+  if(state.step === -1){ state.step = 0; paint(); return; }
+  const q = QUESTIONS[state.step], a = state.answers[q.id];
+
+  if(!answered(q)){ return fail("Please choose an answer to continue."); }
+  if(a.values.some(isOther) && !a.other.trim()){ return fail("Please specify your answer."); }
+
+  if(q.screener){
+    const qualifies = a.values.some(v => CONFIG.qualifyingRegions.includes(v));
+    if(!qualifies){ return finish("screened_out"); }
+  }
+
+  if(state.step === QUESTIONS.length - 1){ return finish("complete"); }
+  state.step++;
+  paint();
+  if(!auto) window.scrollTo({ top:0, behavior:"instant" });
+}
+
+function goBack(){
+  if(state.step <= 0){ state.step = -1; } else { state.step--; }
+  paint();
+}
+
+function fail(msg){
+  const e = $("#err");
+  if(e){ e.textContent = msg; }
+  if(navigator.vibrate) navigator.vibrate(12);
+}
+
+function paint(){
+  renderChrome();
+  state.step === -1 ? renderIntro() : renderQuestion();
+  window.scrollTo({ top:0, behavior:"instant" });
+}
+
+/* ============================================================
+   SUBMISSION
+   ============================================================ */
+function buildPayload(status){
+  const p = {
+    status,
+    submitted_at: new Date().toISOString(),
+    duration_seconds: Math.round((Date.now() - state.startedAt) / 1000)
+  };
+  QUESTIONS.forEach(q => {
+    const a = state.answers[q.id];
+    if(q.type === "text"){ p[q.id] = a.text.trim(); return; }
+    p[q.id] = a.values
+      .map(v => isOther(v) ? `Other: ${a.other.trim()}` : v)
+      .join(" | ");
+  });
+  return p;
+}
+
+async function send(payload){
+  const url = CONFIG.endpoint.trim();
+  if(!url) return { ok:true, previewed:true };
+  try{
+    if(url.includes("script.google.com")){
+      // text/plain avoids a CORS preflight Apps Script can't answer
+      await fetch(url, { method:"POST", mode:"no-cors",
+        headers:{ "Content-Type":"text/plain;charset=utf-8" },
+        body: JSON.stringify(payload) });
+      return { ok:true };
+    }
+    const res = await fetch(url, { method:"POST",
+      headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify(payload) });
+    return { ok: res.ok };
+  }catch(err){
+    return { ok:false, error: String(err) };
+  }
+}
+
+async function finish(status){
+  if(state.sending) return;
+  state.sending = true;
+  nextBtn.disabled = true;
+  nextBtn.innerHTML = '<span class="spinner"></span>Sending';
+
+  const payload = buildPayload(status);
+  const result = await send(payload);
+  state.sending = false;
+
+  if(!result.ok){
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Try again";
+    return fail("Couldn't send your answers. Check your connection and tap Try again.");
+  }
+  renderEnd(status, payload, result.previewed);
+}
+
+function renderEnd(status, payload, previewed){
+  topbar.hidden = true;
+  nav.hidden = true;
+  const done = status === "complete";
+  stage.innerHTML = `
+    <div class="screen end">
+      <div class="seal">${TICK}</div>
+      <h1>${done ? "Thank you!" : "Thanks for your time"}</h1>
+      <p>${done
+        ? "Thank you for sharing your insights. Your feedback will help us better understand the evolving needs of the APAC market research industry and how sample providers can better support researchers."
+        : "This study focuses on research conducted in APAC, so these questions aren't a fit for your work right now. We appreciate you taking a look."}</p>
+      ${CONFIG.organisation ? `<p class="meta">${CONFIG.organisation}</p>` : ""}
+      ${previewed ? `<p class="meta">Preview mode — this response was not saved. Add an endpoint in CONFIG to collect responses.</p>
+        <pre class="dump">${JSON.stringify(payload, null, 2)}</pre>` : ""}
+    </div>`;
+  window.scrollTo({ top:0, behavior:"instant" });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+nextBtn.addEventListener("click", () => goNext(false));
+backBtn.addEventListener("click", goBack);
+document.addEventListener("keydown", e => {
+  if(e.key === "Enter" && e.target.tagName !== "TEXTAREA" && !nav.hidden){ goNext(false); }
+});
+if(!CONFIG.endpoint.trim()){
+  $("#banner").className = "banner";
+  $("#banner").textContent = "PREVIEW MODE — RESPONSES ARE NOT BEING SAVED";
+}
+paint();
+</script>
+</body>
+</html>
