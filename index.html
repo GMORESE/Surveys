@@ -221,7 +221,7 @@
 const CONFIG = {
   // Paste a Google Apps Script Web App URL (…script.google.com/macros/s/…/exec)
   // or a Formspree endpoint (https://formspree.io/f/xxxxxxx). See setup guide.
-  endpoint: "",
+  endpoint: "https://script.google.com/macros/s/AKfycbx8pm7Lct-zeW8UZrN0xh2lk696JvAhMAN9CjfjRzPAj55W9lLooaLsJ62nrPs4KG0X/exec",
 
   // Q2 answers that let a respondent continue. Add "Global / Multi-region"
   // here if you also want multi-region researchers to qualify.
@@ -494,7 +494,7 @@ async function send(payload){
   const url = CONFIG.endpoint.trim();
   if(!url) return { ok:true, previewed:true };
   try{
-    if(url.includes("https://script.google.com/macros/s/AKfycbx8pm7Lct-zeW8UZrN0xh2lk696JvAhMAN9CjfjRzPAj55W9lLooaLsJ62nrPs4KG0X/exec")){
+    if(url.includes("script.google.com")){
       // text/plain avoids a CORS preflight Apps Script can't answer
       await fetch(url, { method:"POST", mode:"no-cors",
         headers:{ "Content-Type":"text/plain;charset=utf-8" },
