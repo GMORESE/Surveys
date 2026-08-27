@@ -494,7 +494,7 @@ async function send(payload){
   const url = CONFIG.endpoint.trim();
   if(!url) return { ok:true, previewed:true };
   try{
-    if(url.includes("script.google.com")){
+    if(url.includes("https://script.google.com/macros/s/AKfycbx8pm7Lct-zeW8UZrN0xh2lk696JvAhMAN9CjfjRzPAj55W9lLooaLsJ62nrPs4KG0X/exec")){
       // text/plain avoids a CORS preflight Apps Script can't answer
       await fetch(url, { method:"POST", mode:"no-cors",
         headers:{ "Content-Type":"text/plain;charset=utf-8" },
