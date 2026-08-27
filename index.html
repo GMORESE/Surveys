@@ -27,6 +27,7 @@
     --r:10px;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none !important}   /* class rules below set display:flex, which would otherwise win */
   html,body{margin:0;padding:0}
   body{
     background:var(--paper);
@@ -302,7 +303,8 @@ const state = {
   step: -1,                    // -1 = intro, 0..8 = questions, 'end' handled separately
   answers: {},
   startedAt: Date.now(),
-  sending: false
+  sending: false,
+  finished: false            // once true the survey is closed — no going back
 };
 QUESTIONS.forEach(q => state.answers[q.id] = { values: [], other: "", text: "" });
 
@@ -402,6 +404,7 @@ function renderQuestion(){
 }
 
 function toggle(q, opt){
+  if(state.finished) return;
   const a = state.answers[q.id];
   const on = a.values.includes(opt);
 
@@ -437,6 +440,7 @@ function toggle(q, opt){
    NAVIGATION + VALIDATION
    ============================================================ */
 function goNext(auto){
+  if(state.finished) return;
   if(state.step === -1){ state.step = 0; paint(); return; }
   const q = QUESTIONS[state.step], a = state.answers[q.id];
 
@@ -455,6 +459,7 @@ function goNext(auto){
 }
 
 function goBack(){
+  if(state.finished) return;
   if(state.step <= 0){ state.step = -1; } else { state.step--; }
   paint();
 }
@@ -493,17 +498,31 @@ function buildPayload(status){
 async function send(payload){
   const url = CONFIG.endpoint.trim();
   if(!url) return { ok:true, previewed:true };
-  try{
-    if(url.includes("script.google.com")){
-      // text/plain avoids a CORS preflight Apps Script can't answer
-      await fetch(url, { method:"POST", mode:"no-cors",
-        headers:{ "Content-Type":"text/plain;charset=utf-8" },
-        body: JSON.stringify(payload) });
+  const body = JSON.stringify(payload);
+
+  if(url.includes("script.google.com")){
+    // Apps Script can't answer a CORS preflight, so we can't read its reply either way.
+    // sendBeacon hands the request to the browser to deliver in the background — the
+    // thank-you screen shows immediately instead of waiting on Google's servers.
+    try{
+      if(navigator.sendBeacon){
+        const blob = new Blob([body], { type:"text/plain;charset=utf-8" });
+        if(navigator.sendBeacon(url, blob)) return { ok:true };
+      }
+    }catch(err){ /* fall through to fetch */ }
+    try{
+      fetch(url, { method:"POST", mode:"no-cors", keepalive:true,
+        headers:{ "Content-Type":"text/plain;charset=utf-8" }, body });
       return { ok:true };
+    }catch(err){
+      return { ok:false, error: String(err) };
     }
+  }
+
+  try{
     const res = await fetch(url, { method:"POST",
       headers:{ "Content-Type":"application/json", "Accept":"application/json" },
-      body: JSON.stringify(payload) });
+      body });
     return { ok: res.ok };
   }catch(err){
     return { ok:false, error: String(err) };
@@ -529,8 +548,13 @@ async function finish(status){
 }
 
 function renderEnd(status, payload, previewed){
-  topbar.hidden = true;
-  nav.hidden = true;
+  state.finished = true;
+  // Remove the chrome outright rather than hiding it — nothing to tap, nothing to
+  // navigate back to. The next person has to scan the code again.
+  topbar.remove();
+  nav.remove();
+  const b = $("#banner"); if(b) b.remove();
+
   const done = status === "complete";
   stage.innerHTML = `
     <div class="screen end">
@@ -552,6 +576,7 @@ function renderEnd(status, payload, previewed){
 nextBtn.addEventListener("click", () => goNext(false));
 backBtn.addEventListener("click", goBack);
 document.addEventListener("keydown", e => {
+  if(state.finished) return;
   if(e.key === "Enter" && e.target.tagName !== "TEXTAREA" && !nav.hidden){ goNext(false); }
 });
 if(!CONFIG.endpoint.trim()){
