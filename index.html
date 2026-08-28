@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>APAC Sample Needs Survey</title>
-<meta name="description" content="A short survey on sample needs across APAC. About 2 minutes.">
+<title>APAC Research &amp; AI Insights Survey</title>
+<meta name="description" content="A short survey on APAC sample sourcing and AI-moderated research. About 3 minutes.">
 <meta name="theme-color" content="#0F1C33">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,87 +220,174 @@
    Leave endpoint empty to run in preview mode (nothing is saved).
    ============================================================ */
 const CONFIG = {
-  // Paste a Google Apps Script Web App URL (…script.google.com/macros/s/…/exec)
-  // or a Formspree endpoint (https://formspree.io/f/xxxxxxx). See setup guide.
-  endpoint: "https://script.google.com/macros/s/AKfycbx8pm7Lct-zeW8UZrN0xh2lk696JvAhMAN9CjfjRzPAj55W9lLooaLsJ62nrPs4KG0X/exec",
+  // Google Apps Script Web App URL, or a Formspree endpoint.
+  endpoint: "https://script.google.com/macros/s/AKfycbz-uE8juUkSkj4e4yobNaPWCs63GK8bW4R8z_retjk23TQ4m024oYwk3VL-nv2lxBaI/exec",
 
-  // Q2 answers that let a respondent continue. Add "Global / Multi-region"
-  // here if you also want multi-region researchers to qualify.
-  qualifyingRegions: ["APAC"],
-
-  // Shown in the footer of the intro and thank-you screens.
+  // Shown on the intro and thank-you screens. Leave empty to hide.
   organisation: ""
 };
 
 /* ============================================================
    SURVEY CONTENT
+
+   type      "single" | "multi" | "text"
+   max       cap on a multi-select
+   exclusive options that clear every other selection when picked
+   showIf    skip logic — question is only asked when this returns true
    ============================================================ */
-const APAC_MARKETS = ["Australia","China","India","Indonesia","Japan","Malaysia",
-  "Philippines","Singapore","South Korea","Taiwan","Thailand","Vietnam"];
+const NO_AI_PLANS = "I have not conducted any AI-moderated interviews and do not plan to";
+const RESEARCH_FIRM = "Market Research / Research Firm";
 
 const QUESTIONS = [
-  { id:"q1", type:"single",
-    title:"Which best describes your organization?",
-    options:["Market research agency","Brand / End client","Consulting firm",
-             "Sample provider","Technology / Research platform","Other (please specify)"] },
 
-  { id:"q2", type:"multi", screener:true,
-    title:"Which regions do you currently conduct or plan to conduct research in?",
+  { id:"q01_region", type:"single",
+    title:"Which region are you or your primary business unit based in?",
+    options:[
+      "North America (US & Canada)",
+      "LATAM (Latin America & Caribbean)",
+      "EMEA (Europe, Middle East, & Africa)",
+      "APAC (Asia-Pacific, including Australia & New Zealand)",
+      "Other"] },
+
+  { id:"q02_industry", type:"single",
+    title:"Which of the following best describes your company's primary industry?",
+    options:[
+      "Consumer Goods / Food & Beverage (FMCG)",
+      "Beauty / Personal Care",
+      "Fashion / Apparel",
+      "Retail / E-commerce",
+      "Finance / Insurance",
+      "Healthcare / Pharmaceuticals",
+      "Technology / IT",
+      "Automotive / Mobility",
+      "Media / Entertainment",
+      "Advertising / PR / Marketing Agency",
+      RESEARCH_FIRM,
+      "Consulting",
+      "Other"] },
+
+  { id:"q03_role", type:"single",
+    // Skipped for research firms — the role list doesn't fit that side of the table.
+    showIf: a => !a.q02_industry.values.includes(RESEARCH_FIRM),
+    title:"What best describes your primary role or function?",
+    options:[
+      "Consumer Insights / Market Research",
+      "Marketing / Brand Management",
+      "Product Development / Innovation",
+      "Data Science / Analytics",
+      "Executive Leadership (C-Suite, VP, GM)",
+      "Other"] },
+
+  { id:"q04_experience", type:"single",
+    title:"How many years of experience do you have in market research, marketing, or insights?",
+    options:[
+      "Less than 3 years",
+      "3 to 5 years",
+      "6 to 10 years",
+      "11 to 15 years",
+      "More than 15 years"] },
+
+  { id:"q05_apac_challenges", type:"multi", max:3,
+    title:"What are your biggest challenges when buying APAC sample or working with APAC suppliers?",
+    help:"Select up to 3.",
+    options:[
+      "Data Quality & Fraud: Poor sample quality or high drop-out rates",
+      "Audience Reach: Difficulty finding niche, B2B, or hard-to-reach target audiences",
+      "Speed & Communication: Slow field delivery, poor supplier communication, or long overall timelines",
+      "Budget & Cost: High costs or uncompetitive pricing",
+      "Cultural Expertise: Navigating language nuances, cultural barriers, or a lack of local market guidance",
+      "Compliance: Navigating strict data privacy regulations (e.g., cross-border data transfers)",
+      "Technology: Platform integration friction or technical setup issues",
+      "I do not procure sample in APAC"],
+    exclusive:["I do not procure sample in APAC"] },
+
+  { id:"q06_synthetic_adoption", type:"single",
+    title:"How would you describe your organization's current perception and adoption of Synthetic Insight Tools?",
+    help:"For example, AI personas or synthetic data generation.",
+    options:[
+      "Active Adopter: We are already using synthetic data / AI personas for live projects.",
+      "Experimenter: We are currently running pilots or testing AI research vendors.",
+      "Curious: We aren't using them yet, but we are actively evaluating the technology.",
+      "Skeptical: We are watching the trends, but we are hesitant to trust AI outputs yet.",
+      "Resistant: We have no interest and believe it poses too much risk to data integrity."] },
+
+  { id:"q07_ai_interview_frequency", type:"single",
+    title:"How often do you, or do you plan to, conduct AI-moderated interviews?",
+    options:[
+      "Once a month or less",
+      "Once every 2-3 months",
+      "Once every 6 months",
+      "Once a year or less",
+      "I have not conducted any AI-moderated interviews, but plan to within the next 3-6 months",
+      NO_AI_PLANS] },
+
+  { id:"q08_ai_interview_regions", type:"multi",
+    // Skipped for anyone with no plans to run AI-moderated interviews.
+    showIf: a => !a.q07_ai_interview_frequency.values.includes(NO_AI_PLANS),
+    title:"In which regions do you currently conduct, or plan to conduct, AI-moderated interviews?",
     help:"Select all that apply.",
-    options:["APAC","North America","South America","Europe",
-             "Middle East & Africa (MEA)","Global / Multi-region","Other (please specify)"] },
+    options:[
+      "North America (US & Canada)",
+      "LATAM (Latin America & Caribbean)",
+      "EMEA (Europe, Middle East, & Africa)",
+      "APAC - Japan",
+      "APAC - China / Greater China",
+      "APAC - South Korea",
+      "APAC - Southeast Asia (e.g., Singapore, Indonesia, Vietnam, Thailand)",
+      "APAC - India",
+      "APAC - Australia / New Zealand"] },
 
-  { id:"q3", type:"multi", max:3,
-    title:"Which APAC markets are the most difficult for you to recruit?",
-    help:"Select up to 3.",
-    options:[...APAC_MARKETS,"None","Other (please specify)"],
-    exclusive:["None"] },
-
-  { id:"q4", type:"multi", max:3,
-    title:"What are your biggest challenges when sourcing sample in APAC?",
-    help:"Select up to 3.",
-    options:["Low incidence rates","Limited panel availability","High sample costs",
-             "Difficult quotas","Hard-to-reach audiences","Data quality","Slow fieldwork",
-             "Fraud / duplicate respondents","Lack of local market expertise",
-             "Other (please specify)"] },
-
-  { id:"q5", type:"multi", max:5,
-    title:"What are the most important factors when selecting an APAC sample provider?",
-    help:"Select up to 5.",
-    options:["Data quality","Competitive pricing","Fast turnaround","Strong feasibility",
-             "Large panel / sample availability","Niche audience access",
-             "Coverage across multiple APAC markets","Local market expertise",
-             "API / technology integration","Strong project management"] },
-
-  { id:"q6", type:"multi",
-    title:"Which APAC markets do you expect to have increased research demand over the next 12 months?",
+  { id:"q09_ai_interview_impressions", type:"multi",
+    title:"What are your impressions of AI-moderated interviews?",
     help:"Select all that apply.",
-    options:[...APAC_MARKETS,"Not expecting an increase","Other (please specify)"],
-    exclusive:["Not expecting an increase"] },
+    options:[
+      "Faster project turnaround",
+      "Automated or easier questionnaire creation",
+      "Instant generation of insights reports",
+      "Ability to scale qualitative research easily",
+      "Cost efficiency compared to human moderators",
+      "Multi-language capabilities",
+      "Insights reports were shallow or inaccurate",
+      "The AI lacked deep human empathy and probing",
+      "Setting up the questionnaire / prompts was difficult",
+      "High participant drop-off or poor engagement",
+      "Struggled with local language or cultural nuances",
+      "Data privacy or compliance issues",
+      "None of the above"],
+    exclusive:["None of the above"] },
 
-  { id:"q7", type:"single",
-    title:"Approximately how many APAC completes does your organization expect to source in the next 12 months?",
-    options:["Under 1,000","1,000–5,000","5,001–10,000","10,001–25,000","25,000+","Unsure"] },
+  { id:"q10_synthetic_use_cases", type:"multi",
+    title:"If you already use, or were to use, AI Synthetic Insight Tools in your work, what kind of use cases would you consider?",
+    help:"Select all that apply.",
+    options:[
+      "Consumer insight collection and analysis",
+      "Advertising / creative testing and validation",
+      "Product / service concept testing",
+      "Marketing strategy planning and simulation",
+      "Competitive and market trend analysis",
+      "Customer segmentation design and validation",
+      "Collecting insights without using personal data",
+      "Other (please specify)",
+      "I do not, and would not, use AI Synthetic Insight Tools"],
+    exclusive:["I do not, and would not, use AI Synthetic Insight Tools"] },
 
-  { id:"q8", type:"multi", max:3,
-    title:"What would make you consider working with a new sample provider in APAC?",
-    help:"Select up to 3.",
-    options:["Better pricing","Access to difficult-to-reach audiences","Better feasibility",
-             "Faster fieldwork","Better data quality","Stronger coverage in specific APAC markets",
-             "API / automated sample access","More flexible quotas",
-             "Better project management / support","Other (please specify)"] },
-
-  { id:"q9", type:"text", optional:true,
-    title:"If you could improve one aspect of conducting research in APAC, what would it be?",
-    help:"Open response.",
-    placeholder:"Tell us in your own words…" }
+  { id:"q11_synthetic_barrier", type:"single",
+    title:"What is your primary concern or barrier regarding the use of synthetic data in market research?",
+    options:[
+      "AI hallucinations (fear that the AI will invent inaccurate consumer behaviors)",
+      "Lack of “ground truth” (no real human data to validate the AI against)",
+      "Data privacy, copyright, or security risks",
+      "Pushback from internal stakeholders who only trust traditional human research",
+      "We lack the internal technical expertise to deploy it",
+      "Other (please specify)",
+      "I have no major concerns"] }
 ];
 
 /* ============================================================
    STATE
    ============================================================ */
 const state = {
-  step: -1,                    // -1 = intro, 0..8 = questions, 'end' handled separately
+  step: -1,                  // -1 = intro, otherwise an index into QUESTIONS
   answers: {},
   startedAt: Date.now(),
   sending: false,
@@ -319,16 +406,34 @@ const answered = q => q.type === "text"
   ? (q.optional || state.answers[q.id].text.trim().length > 0)
   : state.answers[q.id].values.length > 0;
 
+/* ---- skip logic -------------------------------------------------
+   A question is asked only when its showIf passes. Visibility depends
+   solely on earlier answers, so the path is always resolved by the time
+   the respondent reaches a question.                                */
+const visible = q => !q.showIf || q.showIf(state.answers);
+const flow    = () => QUESTIONS.filter(visible);
+
+function nextIndex(from){
+  for(let i = from + 1; i < QUESTIONS.length; i++) if(visible(QUESTIONS[i])) return i;
+  return -1;
+}
+function prevIndex(from){
+  for(let i = from - 1; i >= 0; i--) if(visible(QUESTIONS[i])) return i;
+  return -1;
+}
+
 /* ============================================================
    RENDER
    ============================================================ */
 function renderChrome(){
   if(state.step < 0){ topbar.hidden = true; return; }
   topbar.hidden = false;
-  track.innerHTML = QUESTIONS.map((q,i) =>
-    `<div class="cell ${i < state.step ? "done" : ""} ${i === state.step ? "now" : ""}"></div>`
+  const path = flow();
+  const pos  = path.indexOf(QUESTIONS[state.step]);   // 0-based position on the path
+  track.innerHTML = path.map((q,i) =>
+    `<div class="cell ${i < pos ? "done" : ""} ${i === pos ? "now" : ""}"></div>`
   ).join("");
-  counter.textContent = `Q${state.step + 1} / ${QUESTIONS.length}`;
+  counter.textContent = `Q${pos + 1} / ${path.length}`;
 }
 
 function renderIntro(){
@@ -337,11 +442,12 @@ function renderIntro(){
   nextBtn.textContent = "Start the survey";
   stage.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">APAC sample study · ${QUESTIONS.length} questions · ~2 minutes</p>
-      <h1>Where does sample fall short in APAC?</h1>
-      <p class="lede">We'd like to better understand the current and future sample needs of the market
-      research industry across APAC. Your feedback will help identify where sample providers can better
-      support researchers with recruitment, feasibility, quality, and fieldwork.</p>
+      <p class="eyebrow">APAC research study · ${QUESTIONS.length} questions · ~3 minutes</p>
+      <h1>Sample, AI, and the future of APAC research</h1>
+      <p class="lede">We'd like to understand how research teams are sourcing sample across APAC, and
+      how they're approaching AI-moderated interviews and synthetic insight tools.</p>
+      <p class="lede">Your feedback will help identify where suppliers can better support researchers —
+      on recruitment and quality, and on the new tools now entering the workflow.</p>
       <p class="lede">Responses are anonymous and reported in aggregate.</p>
       ${CONFIG.organisation ? `<p class="meta">Run by ${CONFIG.organisation}</p>` : ""}
     </div>`;
@@ -351,8 +457,8 @@ function renderQuestion(){
   const q = QUESTIONS[state.step];
   const a = state.answers[q.id];
   nav.hidden = false;
-  backBtn.hidden = false;
-  nextBtn.textContent = state.step === QUESTIONS.length - 1 ? "Submit answers" : "Next";
+  backBtn.hidden = prevIndex(state.step) === -1;
+  nextBtn.textContent = nextIndex(state.step) === -1 ? "Submit answers" : "Next";
 
   let helpRow = "";
   if(q.help || q.max){
@@ -387,7 +493,7 @@ function renderQuestion(){
 
   stage.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">Question ${state.step + 1}</p>
+      <p class="eyebrow">Question ${flow().indexOf(q) + 1}</p>
       <h2>${q.title}</h2>
       ${helpRow}
       ${field}
@@ -441,26 +547,23 @@ function toggle(q, opt){
    ============================================================ */
 function goNext(auto){
   if(state.finished) return;
-  if(state.step === -1){ state.step = 0; paint(); return; }
-  const q = QUESTIONS[state.step], a = state.answers[q.id];
+  if(state.step === -1){ state.step = nextIndex(-1); paint(); return; }
 
+  const q = QUESTIONS[state.step], a = state.answers[q.id];
   if(!answered(q)){ return fail("Please choose an answer to continue."); }
   if(a.values.some(isOther) && !a.other.trim()){ return fail("Please specify your answer."); }
 
-  if(q.screener){
-    const qualifies = a.values.some(v => CONFIG.qualifyingRegions.includes(v));
-    if(!qualifies){ return finish("screened_out"); }
-  }
-
-  if(state.step === QUESTIONS.length - 1){ return finish("complete"); }
-  state.step++;
+  const nxt = nextIndex(state.step);
+  if(nxt === -1){ return finish("complete"); }
+  state.step = nxt;
   paint();
   if(!auto) window.scrollTo({ top:0, behavior:"instant" });
 }
 
 function goBack(){
   if(state.finished) return;
-  if(state.step <= 0){ state.step = -1; } else { state.step--; }
+  const prv = prevIndex(state.step);
+  state.step = prv === -1 ? -1 : prv;
   paint();
 }
 
@@ -481,16 +584,17 @@ function paint(){
    ============================================================ */
 function buildPayload(status){
   const p = {
-    status,
     submitted_at: new Date().toISOString(),
+    status,
     duration_seconds: Math.round((Date.now() - state.startedAt) / 1000)
   };
   QUESTIONS.forEach(q => {
     const a = state.answers[q.id];
+    // A question the respondent was routed past stays blank, even if they
+    // backtracked and answered it under a different path earlier.
+    if(!visible(q)){ p[q.id] = ""; return; }
     if(q.type === "text"){ p[q.id] = a.text.trim(); return; }
-    p[q.id] = a.values
-      .map(v => isOther(v) ? `Other: ${a.other.trim()}` : v)
-      .join(" | ");
+    p[q.id] = a.values.map(v => isOther(v) ? `Other: ${a.other.trim()}` : v).join(" | ");
   });
   return p;
 }
@@ -530,7 +634,7 @@ async function send(payload){
 }
 
 async function finish(status){
-  if(state.sending) return;
+  if(state.sending || state.finished) return;
   state.sending = true;
   nextBtn.disabled = true;
   nextBtn.innerHTML = '<span class="spinner"></span>Sending';
@@ -555,14 +659,13 @@ function renderEnd(status, payload, previewed){
   nav.remove();
   const b = $("#banner"); if(b) b.remove();
 
-  const done = status === "complete";
   stage.innerHTML = `
     <div class="screen end">
       <div class="seal">${TICK}</div>
-      <h1>${done ? "Thank you!" : "Thanks for your time"}</h1>
-      <p>${done
-        ? "Thank you for sharing your insights. Your feedback will help us better understand the evolving needs of the APAC market research industry and how sample providers can better support researchers."
-        : "This study focuses on research conducted in APAC, so these questions aren't a fit for your work right now. We appreciate you taking a look."}</p>
+      <h1>Thank you!</h1>
+      <p>Thank you for sharing your insights. Your feedback will help us better understand the
+      evolving needs of the APAC market research industry — both how sample providers can better
+      support researchers, and how AI and synthetic tools are finding a place in the work.</p>
       ${CONFIG.organisation ? `<p class="meta">${CONFIG.organisation}</p>` : ""}
       ${previewed ? `<p class="meta">Preview mode — this response was not saved. Add an endpoint in CONFIG to collect responses.</p>
         <pre class="dump">${JSON.stringify(payload, null, 2)}</pre>` : ""}
