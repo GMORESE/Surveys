@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>APAC Research &amp; AI Insights Survey</title>
-<meta name="description" content="A short survey on APAC sample sourcing and AI-moderated research. About 3 minutes.">
+<meta name="description" content="A short survey on APAC sample sourcing and AI-moderated research.">
 <meta name="theme-color" content="#0F1C33">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,6 +80,7 @@
     font-family:var(--mono);font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--accent);margin:0 0 10px;
   }
+  .eyebrow.center{text-align:center}
   h1{
     font-family:var(--display);font-weight:700;
     font-size:clamp(28px,7.4vw,38px);line-height:1.08;
@@ -442,7 +443,7 @@ function renderIntro(){
   nextBtn.textContent = "Start the survey";
   stage.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">APAC research study · ${QUESTIONS.length} questions · ~3 minutes</p>
+      <p class="eyebrow center">APAC research study</p>
       <h1>Sample, AI, and the future of APAC research</h1>
       <p class="lede">We'd like to understand how research teams are sourcing sample across APAC, and
       how they're approaching AI-moderated interviews and synthetic insight tools.</p>
